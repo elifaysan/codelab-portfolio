@@ -8,16 +8,26 @@ document.getElementById("year").textContent = new Date().getFullYear();
 const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const finePointer = window.matchMedia("(pointer: fine)").matches;
 const isMobile = window.matchMedia("(max-width: 768px)").matches;
+const isIOS =
+  /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+  (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+
+if (isIOS) document.documentElement.classList.add("ios");
+
 // Zayıf cihaz / veri tasarrufu: canvas'a dokunmadan scroll ve ekstra efektleri hafiflet
 const liteMode =
   reduced ||
   isMobile ||
+  isIOS ||
   (navigator.hardwareConcurrency || 8) <= 2 ||
   (navigator.deviceMemory || 8) < 4 ||
   navigator.connection?.saveData === true;
 
 gsap.registerPlugin(ScrollTrigger);
 ScrollTrigger.config({ limitCallbacks: true, ignoreMobileResize: true });
+if (isIOS && ScrollTrigger.normalizeScroll) {
+  ScrollTrigger.normalizeScroll(true);
+}
 
 // Canlı sitede farklı domain kullanıyorsan index.html içinde ayarla:
 // <script>window.CONTACT_API_URL = "https://api.senindomain.com/api/contact";</script>
@@ -467,17 +477,36 @@ function initHorizontalScroll() {
     return Math.max(0, Math.min(centered, getMaxOffset()));
   };
 
+  const applyTransform = (offset) => {
+    const value = `translate3d(${-offset}px, 0, 0)`;
+    hTrack.style.transform = value;
+    hTrack.style.webkitTransform = value;
+  };
+
   const goTo = (nextIndex, instant = false) => {
     index = Math.max(0, Math.min(cards.length - 1, nextIndex));
     const offset = getOffset(index);
     hTrack.style.transition =
       instant || reduced ? "none" : "transform 0.5s cubic-bezier(0.16, 1, 0.3, 1)";
-    hTrack.style.transform = `translate3d(${-offset}px, 0, 0)`;
+    applyTransform(offset);
     if (prevBtn) prevBtn.disabled = index <= 0;
     if (nextBtn) nextBtn.disabled = index >= cards.length - 1;
     if (hBar && cards.length > 1) {
       hBar.style.width = `${(index / (cards.length - 1)) * 100}%`;
     }
+  };
+
+  const bindNav = (btn, handler) => {
+    if (!btn) return;
+    btn.addEventListener("click", handler);
+    btn.addEventListener(
+      "touchend",
+      (e) => {
+        e.preventDefault();
+        handler(e);
+      },
+      { passive: false },
+    );
   };
 
   const onPrev = (e) => {
@@ -490,9 +519,15 @@ function initHorizontalScroll() {
     goTo(index + 1);
   };
 
-  prevBtn?.addEventListener("click", onPrev);
-  nextBtn?.addEventListener("click", onNext);
-  goTo(0, true);
+  bindNav(prevBtn, onPrev);
+  bindNav(nextBtn, onNext);
+
+  const initPosition = () => goTo(index, true);
+  if (document.readyState === "complete") {
+    requestAnimationFrame(initPosition);
+  } else {
+    window.addEventListener("load", () => requestAnimationFrame(initPosition), { once: true });
+  }
 
   const onResize = () => goTo(index, true);
   addEventListener("resize", onResize);
@@ -506,6 +541,7 @@ function initHorizontalScroll() {
       nextBtn?.removeEventListener("click", onNext);
       removeEventListener("resize", onResize);
       hTrack.style.transform = "";
+      hTrack.style.webkitTransform = "";
       hTrack.style.transition = "";
     },
   };
@@ -519,6 +555,15 @@ window.addEventListener("load", () => {
 
 if (document.fonts?.ready) {
   document.fonts.ready.then(() => horizontalScroll?.refresh?.());
+}
+
+if (isIOS) {
+  addEventListener("orientationchange", () => {
+    setTimeout(() => {
+      ScrollTrigger.refresh();
+      horizontalScroll?.refresh?.();
+    }, 400);
+  });
 }
 
 // ── Process timeline ──
