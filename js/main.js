@@ -457,6 +457,10 @@ function initHorizontalScroll() {
   const hBar = document.getElementById("hBar");
   const prevBtn = document.getElementById("hPrev");
   const nextBtn = document.getElementById("hNext");
+  const prevCtrl = document.getElementById("hPrevCtrl");
+  const nextCtrl = document.getElementById("hNextCtrl");
+  const prevBtns = [prevBtn, prevCtrl].filter(Boolean);
+  const nextBtns = [nextBtn, nextCtrl].filter(Boolean);
   if (!viewport || !hTrack) return null;
 
   enableNativeHorizontal();
@@ -502,8 +506,12 @@ function initHorizontalScroll() {
     const max = viewport.scrollWidth - viewport.clientWidth;
     const atStart = viewport.scrollLeft <= 8;
     const atEnd = viewport.scrollLeft >= max - 8;
-    if (prevBtn) prevBtn.disabled = atStart;
-    if (nextBtn) nextBtn.disabled = atEnd;
+    prevBtns.forEach((btn) => {
+      btn.disabled = atStart;
+    });
+    nextBtns.forEach((btn) => {
+      btn.disabled = atEnd;
+    });
   };
 
   const onPrevClick = () => {
@@ -515,8 +523,8 @@ function initHorizontalScroll() {
   };
 
   viewport.addEventListener("scroll", syncProgress, { passive: true });
-  prevBtn?.addEventListener("click", onPrevClick);
-  nextBtn?.addEventListener("click", onNextClick);
+  prevBtns.forEach((btn) => btn.addEventListener("click", onPrevClick));
+  nextBtns.forEach((btn) => btn.addEventListener("click", onNextClick));
   syncProgress();
 
   let dragging = false;
@@ -554,8 +562,8 @@ function initHorizontalScroll() {
     kill() {
       viewport.removeEventListener("scroll", syncProgress);
       viewport.removeEventListener("mousedown", onMouseDown);
-      prevBtn?.removeEventListener("click", onPrevClick);
-      nextBtn?.removeEventListener("click", onNextClick);
+      prevBtns.forEach((btn) => btn.removeEventListener("click", onPrevClick));
+      nextBtns.forEach((btn) => btn.removeEventListener("click", onNextClick));
       removeEventListener("mousemove", onMouseMove);
       removeEventListener("mouseup", onMouseUp);
     },

@@ -662,6 +662,9 @@ img {
 }
 
 /* ═══ SCENE 2 · HORIZONTAL BUILD ═══ */
+.scene.scene-build {
+  overflow: visible;
+}
 .scene-build {
   background: var(--bg);
   overflow: visible;
@@ -686,47 +689,104 @@ img {
 }
 
 .horizontal-nav {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+  position: relative;
   width: 100%;
   flex: 1;
   min-width: 0;
-  padding: 0 16px;
+  padding: 0 20px;
 }
 
 .h-nav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
   flex-shrink: 0;
-  width: 48px;
-  height: 48px;
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
-  border: 1px solid var(--glass-border);
-  background: rgba(8, 7, 15, 0.82);
+  border: 2px solid rgba(129, 140, 248, 0.75);
+  background: rgba(12, 11, 24, 0.96);
   backdrop-filter: blur(12px);
-  color: var(--text);
+  color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
+  z-index: 30;
+  pointer-events: auto;
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.55),
+    0 0 20px rgba(99, 102, 241, 0.3);
+  transition:
+    background 0.25s var(--ease-out),
+    border-color 0.25s var(--ease-out),
+    transform 0.25s var(--ease-out),
+    opacity 0.25s var(--ease-out);
+}
+.h-nav-prev {
+  left: 4px;
+}
+.h-nav-next {
+  right: 4px;
+}
+.h-nav-btn svg {
+  width: 26px;
+  height: 26px;
+}
+.h-nav-btn:hover:not(:disabled) {
+  background: rgba(99, 102, 241, 0.55);
+  border-color: #a5b4fc;
+  transform: translateY(-50%) scale(1.08);
+}
+.h-nav-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.h-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  max-width: 1280px;
+  margin: 20px auto 0;
+  padding: 0 24px;
+  flex-shrink: 0;
+}
+.h-ctrl-btn {
+  padding: 14px 28px;
+  border-radius: 999px;
+  border: 1px solid rgba(129, 140, 248, 0.45);
+  background: rgba(99, 102, 241, 0.12);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
   cursor: pointer;
   transition:
     background 0.25s var(--ease-out),
     border-color 0.25s var(--ease-out),
     transform 0.25s var(--ease-out),
     opacity 0.25s var(--ease-out);
-  z-index: 3;
 }
-.h-nav-btn svg {
-  width: 22px;
-  height: 22px;
+.h-ctrl-btn--next {
+  background: linear-gradient(135deg, #6366f1, #a855f7);
+  border-color: transparent;
+  color: #fff;
 }
-.h-nav-btn:hover:not(:disabled) {
-  background: rgba(99, 102, 241, 0.22);
-  border-color: rgba(129, 140, 248, 0.45);
-  transform: scale(1.06);
+.h-ctrl-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  border-color: rgba(129, 140, 248, 0.7);
 }
-.h-nav-btn:disabled {
-  opacity: 0.28;
+.h-ctrl-btn--next:hover:not(:disabled) {
+  filter: brightness(1.1);
+}
+.h-ctrl-btn:disabled {
+  opacity: 0.35;
   cursor: not-allowed;
+  transform: none;
 }
 
 .horizontal-viewport {
@@ -1424,12 +1484,23 @@ img {
     scroll-snap-align: center;
   }
   .horizontal-nav {
-    gap: 8px;
-    padding: 0 8px;
+    padding: 0 12px;
   }
   .h-nav-btn {
-    width: 42px;
-    height: 42px;
+    width: 44px;
+    height: 44px;
+  }
+  .h-nav-btn svg {
+    width: 22px;
+    height: 22px;
+  }
+  .h-controls {
+    padding: 0 16px;
+    gap: 12px;
+  }
+  .h-ctrl-btn {
+    padding: 12px 20px;
+    font-size: 0.88rem;
   }
   .h-progress {
     display: none;
