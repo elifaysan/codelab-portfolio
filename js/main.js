@@ -667,7 +667,13 @@ form?.addEventListener("submit", async (e) => {
     });
 
     const data = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(data.error || "submit failed");
+    if (!res.ok) {
+      note.textContent =
+        data.error ||
+        "Gönderilemedi. Lütfen tekrar deneyin veya elifaysancode@outlook.com adresine yazın.";
+      note.className = "form-note err";
+      return;
+    }
 
     note.textContent = "Mesajınız iletildi. En kısa sürede dönüş yapacağım.";
     note.className = "form-note ok";

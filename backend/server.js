@@ -28,8 +28,9 @@ const {
   SMTP_PASS,
   MAIL_TO,
   RESEND_API_KEY,
-  MAIL_FROM = "codeLab Portföy <onboarding@resend.dev>",
+  MAIL_FROM = "codeLab <onboarding@resend.dev>",
   ALLOWED_ORIGINS = "http://localhost:3001",
+  SITE_URL,
 } = process.env;
 
 const ALLOWED_SERVICES = new Set([
@@ -45,9 +46,14 @@ const app = express();
 app.disable("x-powered-by");
 if (isProd) app.set("trust proxy", 1);
 
-const origins = ALLOWED_ORIGINS.split(",")
-  .map((o) => o.trim())
-  .filter(Boolean);
+const origins = [
+  ...new Set(
+    [
+      ...ALLOWED_ORIGINS.split(",").map((o) => o.trim()).filter(Boolean),
+      ...(SITE_URL ? [SITE_URL.replace(/\/$/, "")] : []),
+    ],
+  ),
+];
 
 app.use(
   helmet({
@@ -170,7 +176,8 @@ async function sendContactMail({ mailTo, cleanEmail, cleanName, cleanService, cl
 
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
-      throw new Error(err.message || `Resend hatası (${res.status})`);
+      const detail = err.message || err.error || `HTTP ${res.status}`;
+      throw new Error(detail);
     }
     return;
   }
@@ -234,8 +241,10 @@ app.post("/api/contact", async (req, res) => {
 
     res.json({ ok: true });
   } catch (err) {
-    if (!isProd) console.error("[contact]", err.message);
-    res.status(500).json({ error: "Mail gönderilemedi." });
+    console.error("[contact]", err.message);
+    res.status(500).json({
+      error: err.message || "Mail gönderilemedi.",
+    });
   }
 });
 
