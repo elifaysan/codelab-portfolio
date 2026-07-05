@@ -28,8 +28,8 @@ async function copyDir(src, dest) {
 
 const html = await fs.readFile(path.join(root, "index.html"), "utf8");
 const htmlBuilt = html
-  .replace('href="css/style.css"', 'href="css/style.min.css"')
-  .replace('src="js/main.js"', 'src="js/main.min.js"');
+  .replace('href="css/style.css"', 'href="css/style.min.css?v=5"')
+  .replace('src="js/main.js"', 'src="js/main.min.js?v=5"');
 
 const minifiedHtml = await minifyHtml(htmlBuilt, {
   collapseWhitespace: true,
