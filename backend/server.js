@@ -27,6 +27,8 @@ const {
   SMTP_USER,
   SMTP_PASS,
   MAIL_TO,
+  RESEND_API_KEY,
+  MAIL_FROM = "codeLab Portföy <onboarding@resend.dev>",
   ALLOWED_ORIGINS = "http://localhost:3001",
 } = process.env;
 
@@ -122,10 +124,65 @@ function getTransporter() {
       port: Number(SMTP_PORT),
       secure: false,
       requireTLS: true,
+      connectionTimeout: 10_000,
+      greetingTimeout: 10_000,
+      socketTimeout: 15_000,
       auth: { user: SMTP_USER, pass },
     });
   }
   return transporter;
+}
+
+async function sendContactMail({ mailTo, cleanEmail, cleanName, cleanService, cleanMessage, subject }) {
+  const text = [
+    `Ad: ${cleanName}`,
+    `E-posta: ${cleanEmail}`,
+    `Hizmet: ${cleanService || "—"}`,
+    "",
+    cleanMessage,
+  ].join("\n");
+
+  const html = `
+    <p><strong>Ad:</strong> ${escapeHtml(cleanName)}</p>
+    <p><strong>E-posta:</strong> ${escapeHtml(cleanEmail)}</p>
+    <p><strong>Hizmet:</strong> ${escapeHtml(cleanService || "—")}</p>
+    <hr>
+    <p>${escapeHtml(cleanMessage).replace(/\n/g, "<br>")}</p>
+  `;
+
+  if (RESEND_API_KEY) {
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${RESEND_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from: MAIL_FROM,
+        to: [mailTo],
+        reply_to: cleanEmail,
+        subject,
+        text,
+        html,
+      }),
+      signal: AbortSignal.timeout(15_000),
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || `Resend hatası (${res.status})`);
+    }
+    return;
+  }
+
+  await getTransporter().sendMail({
+    from: `"codeLab Portföy" <${SMTP_USER}>`,
+    to: mailTo,
+    replyTo: cleanEmail,
+    subject,
+    text,
+    html,
+  });
 }
 
 const isEmail = (v) =>
@@ -162,25 +219,17 @@ app.post("/api/contact", async (req, res) => {
     const mailTo = MAIL_TO || SMTP_USER;
     const subject = `Proje talebi — ${cleanService || "Genel"}`;
 
-    await getTransporter().sendMail({
-      from: `"codeLab Portföy" <${SMTP_USER}>`,
-      to: mailTo,
-      replyTo: cleanEmail,
+    if (!RESEND_API_KEY && (!SMTP_HOST || !SMTP_USER || !SMTP_PASS)) {
+      return res.status(503).json({ error: "Mail servisi yapılandırılmamış." });
+    }
+
+    await sendContactMail({
+      mailTo,
+      cleanEmail,
+      cleanName,
+      cleanService,
+      cleanMessage,
       subject,
-      text: [
-        `Ad: ${cleanName}`,
-        `E-posta: ${cleanEmail}`,
-        `Hizmet: ${cleanService || "—"}`,
-        "",
-        cleanMessage,
-      ].join("\n"),
-      html: `
-        <p><strong>Ad:</strong> ${escapeHtml(cleanName)}</p>
-        <p><strong>E-posta:</strong> ${escapeHtml(cleanEmail)}</p>
-        <p><strong>Hizmet:</strong> ${escapeHtml(cleanService || "—")}</p>
-        <hr>
-        <p>${escapeHtml(cleanMessage).replace(/\n/g, "<br>")}</p>
-      `,
     });
 
     res.json({ ok: true });
@@ -208,7 +257,16 @@ app.use((_req, res) => {
 
 app.listen(PORT, () => {
   console.log(`Portföy sunucusu → http://localhost:${PORT}`);
-  if (!isProd) console.log(`SMTP → ${SMTP_HOST} (${SMTP_USER})`);
+  if (!isProd) {
+    console.log(
+      RESEND_API_KEY ? "Mail → Resend API" : `SMTP → ${SMTP_HOST} (${SMTP_USER})`,
+    );
+  }
+  if (isProd && !RESEND_API_KEY) {
+    console.warn(
+      "Uyarı: Render Free SMTP engeller. RESEND_API_KEY ekleyin veya Starter plana geçin.",
+    );
+  }
   if (isProd && origins.some((o) => o.includes("localhost"))) {
     console.warn("Uyarı: ALLOWED_ORIGINS içinde localhost var.");
   }

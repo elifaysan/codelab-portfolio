@@ -646,6 +646,9 @@ form?.addEventListener("submit", async (e) => {
   note.textContent = "Gönderiliyor...";
   note.className = "form-note";
 
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 35_000);
+
   try {
     const res = await fetch(CONTACT_API, {
       method: "POST",
@@ -660,6 +663,7 @@ form?.addEventListener("submit", async (e) => {
         message: message.value.trim(),
         _gotcha: form._gotcha?.value ?? "",
       }),
+      signal: controller.signal,
     });
 
     const data = await res.json().catch(() => ({}));
@@ -668,11 +672,14 @@ form?.addEventListener("submit", async (e) => {
     note.textContent = "Mesajınız iletildi. En kısa sürede dönüş yapacağım.";
     note.className = "form-note ok";
     form.reset();
-  } catch {
+  } catch (err) {
     note.textContent =
-      "Gönderilemedi. Lütfen tekrar deneyin veya elifaysancode@outlook.com adresine yazın.";
+      err.name === "AbortError"
+        ? "İstek zaman aşımına uğradı. Lütfen tekrar deneyin veya elifaysancode@outlook.com adresine yazın."
+        : "Gönderilemedi. Lütfen tekrar deneyin veya elifaysancode@outlook.com adresine yazın.";
     note.className = "form-note err";
   } finally {
+    clearTimeout(timeoutId);
     submitBtn.disabled = false;
   }
 });
