@@ -465,9 +465,6 @@ function initHorizontalScroll() {
   const hint = viewport.querySelector(".h-scroll-hint");
   if (hint) hint.textContent = "Oklarla veya yana kaydır →";
 
-  const getCardLeft = (card) =>
-    card.offsetLeft + hTrack.offsetLeft - (viewport.clientWidth - card.offsetWidth) / 2;
-
   const getMaxScroll = () => Math.max(0, viewport.scrollWidth - viewport.clientWidth);
 
   const getActiveIndex = () => {
