@@ -443,14 +443,7 @@ if (finePointer && !reduced) {
   });
 }
 
-// ── Horizontal scroll (Scene 2) — native, tüm cihazlarda güvenilir ──
-function enableNativeHorizontal() {
-  const viewport = document.querySelector(".horizontal-viewport");
-  if (!viewport) return;
-  viewport.classList.add("horizontal-native");
-  viewport.setAttribute("data-lenis-prevent", "");
-}
-
+// ── Horizontal carousel (Scene 2) — transform ile, her cihazda çalışır ──
 function initHorizontalScroll() {
   const viewport = document.querySelector(".horizontal-viewport");
   const hTrack = document.getElementById("hTrack");
@@ -459,132 +452,73 @@ function initHorizontalScroll() {
   const nextBtn = document.getElementById("hNext");
   if (!viewport || !hTrack) return null;
 
-  enableNativeHorizontal();
-
   const cards = [...hTrack.querySelectorAll(".h-card")];
-  const hint = viewport.querySelector(".h-scroll-hint");
-  if (hint) hint.textContent = "Oklarla veya yana kaydır →";
+  if (!cards.length) return null;
 
-  const getMaxScroll = () => Math.max(0, viewport.scrollWidth - viewport.clientWidth);
+  let index = 0;
 
-  const getActiveIndex = () => {
-    const center = viewport.scrollLeft + viewport.clientWidth / 2;
-    let closest = 0;
-    let minDist = Infinity;
-    cards.forEach((card, i) => {
-      const cardCenter = card.offsetLeft + hTrack.offsetLeft + card.offsetWidth / 2;
-      const dist = Math.abs(cardCenter - center);
-      if (dist < minDist) {
-        minDist = dist;
-        closest = i;
-      }
-    });
-    return closest;
+  const getMaxOffset = () =>
+    Math.max(0, hTrack.scrollWidth - viewport.clientWidth);
+
+  const getOffset = (i) => {
+    const card = cards[i];
+    if (!card) return 0;
+    const centered = card.offsetLeft - (viewport.clientWidth - card.offsetWidth) / 2;
+    return Math.max(0, Math.min(centered, getMaxOffset()));
   };
 
-  const scrollToCard = (index) => {
-    const card = cards[index];
-    if (!card) return;
-    card.scrollIntoView({
-      behavior: reduced ? "auto" : "smooth",
-      inline: "center",
-      block: "nearest",
-    });
-    requestAnimationFrame(syncProgress);
-    setTimeout(syncProgress, 350);
-  };
-
-  const updateNavButtons = () => {
-    const i = getActiveIndex();
-    if (prevBtn) prevBtn.disabled = i <= 0;
-    if (nextBtn) nextBtn.disabled = i >= cards.length - 1;
-  };
-
-  const syncProgress = () => {
-    const max = getMaxScroll();
-    if (hBar) {
-      hBar.style.width = max > 0 ? `${(viewport.scrollLeft / max) * 100}%` : "0%";
+  const goTo = (nextIndex, instant = false) => {
+    index = Math.max(0, Math.min(cards.length - 1, nextIndex));
+    const offset = getOffset(index);
+    hTrack.style.transition =
+      instant || reduced ? "none" : "transform 0.5s cubic-bezier(0.16, 1, 0.3, 1)";
+    hTrack.style.transform = `translate3d(${-offset}px, 0, 0)`;
+    if (prevBtn) prevBtn.disabled = index <= 0;
+    if (nextBtn) nextBtn.disabled = index >= cards.length - 1;
+    if (hBar && cards.length > 1) {
+      hBar.style.width = `${(index / (cards.length - 1)) * 100}%`;
     }
-    updateNavButtons();
   };
 
-  const onPrevClick = (e) => {
+  const onPrev = (e) => {
     e.preventDefault();
-    e.stopPropagation();
-    scrollToCard(Math.max(0, getActiveIndex() - 1));
+    goTo(index - 1);
   };
 
-  const onNextClick = (e) => {
+  const onNext = (e) => {
     e.preventDefault();
-    e.stopPropagation();
-    scrollToCard(Math.min(cards.length - 1, getActiveIndex() + 1));
+    goTo(index + 1);
   };
 
-  viewport.addEventListener("scroll", syncProgress, { passive: true });
-  prevBtn?.addEventListener("click", onPrevClick);
-  nextBtn?.addEventListener("click", onNextClick);
-  syncProgress();
+  prevBtn?.addEventListener("click", onPrev);
+  nextBtn?.addEventListener("click", onNext);
+  goTo(0, true);
 
-  let dragging = false;
-  let startX = 0;
-  let startScroll = 0;
-
-  const onMouseDown = (e) => {
-    if (!finePointer || e.button !== 0) return;
-    const target = e.target;
-    if (target.closest("a, button, input, textarea, select")) return;
-    dragging = true;
-    startX = e.pageX;
-    startScroll = viewport.scrollLeft;
-    viewport.classList.add("is-dragging");
-  };
-
-  const onMouseMove = (e) => {
-    if (!dragging) return;
-    e.preventDefault();
-    viewport.scrollLeft = startScroll - (e.pageX - startX);
-    syncProgress();
-  };
-
-  const onMouseUp = () => {
-    if (!dragging) return;
-    dragging = false;
-    viewport.classList.remove("is-dragging");
-  };
-
-  viewport.addEventListener("mousedown", onMouseDown);
-  addEventListener("mousemove", onMouseMove);
-  addEventListener("mouseup", onMouseUp);
+  const onResize = () => goTo(index, true);
+  addEventListener("resize", onResize);
 
   return {
+    refresh() {
+      goTo(index, true);
+    },
     kill() {
-      viewport.removeEventListener("scroll", syncProgress);
-      viewport.removeEventListener("mousedown", onMouseDown);
-      prevBtn?.removeEventListener("click", onPrevClick);
-      nextBtn?.removeEventListener("click", onNextClick);
-      removeEventListener("mousemove", onMouseMove);
-      removeEventListener("mouseup", onMouseUp);
+      prevBtn?.removeEventListener("click", onPrev);
+      nextBtn?.removeEventListener("click", onNext);
+      removeEventListener("resize", onResize);
+      hTrack.style.transform = "";
+      hTrack.style.transition = "";
     },
   };
-}
-
-function refreshHorizontalScroll() {
-  horizontalScroll?.kill?.();
-  horizontalScroll = initHorizontalScroll();
-  ScrollTrigger.refresh();
 }
 
 let horizontalScroll = initHorizontalScroll();
 
 window.addEventListener("load", () => {
-  refreshHorizontalScroll();
-  // Yavaş bağlantıda kart genişliği geç hesaplanırsa tekrar dene
-  setTimeout(refreshHorizontalScroll, 400);
-  setTimeout(refreshHorizontalScroll, 1500);
+  horizontalScroll?.refresh?.();
 });
 
 if (document.fonts?.ready) {
-  document.fonts.ready.then(() => refreshHorizontalScroll());
+  document.fonts.ready.then(() => horizontalScroll?.refresh?.());
 }
 
 // ── Process timeline ──
@@ -792,6 +726,6 @@ let resizeTimer;
 addEventListener("resize", () => {
   clearTimeout(resizeTimer);
   resizeTimer = setTimeout(() => {
-    refreshHorizontalScroll();
+    horizontalScroll?.refresh?.();
   }, 300);
 });
