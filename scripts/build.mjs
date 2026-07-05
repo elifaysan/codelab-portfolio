@@ -28,8 +28,8 @@ async function copyDir(src, dest) {
 
 const html = await fs.readFile(path.join(root, "index.html"), "utf8");
 const htmlBuilt = html
-  .replace('href="css/style.css"', 'href="css/style.min.css?v=5"')
-  .replace('src="js/main.js"', 'src="js/main.min.js?v=5"');
+  .replace('href="css/style.css"', 'href="css/style.min.css?v=6"')
+  .replace('src="js/main.js"', 'src="js/main.min.js?v=6"');
 
 const minifiedHtml = await minifyHtml(htmlBuilt, {
   collapseWhitespace: true,
@@ -47,21 +47,19 @@ const css = await fs.readFile(path.join(root, "css", "style.css"), "utf8");
 const minifiedCss = new CleanCSS({ level: 2 }).minify(css).styles;
 
 const js = await fs.readFile(path.join(root, "js", "main.js"), "utf8");
-const obfuscatedJs = JavaScriptObfuscator.obfuscate(js, {
+// Ağır obfuscation CPU'yu yorar ve bazı tarayıcılarda donmaya yol açar — sadece sıkıştır
+const minifiedJs = JavaScriptObfuscator.obfuscate(js, {
   compact: true,
-  controlFlowFlattening: true,
-  controlFlowFlatteningThreshold: 0.5,
+  controlFlowFlattening: false,
   deadCodeInjection: false,
+  debugProtection: false,
+  disableConsoleOutput: false,
   identifierNamesGenerator: "hexadecimal",
   renameGlobals: false,
-  selfDefending: true,
-  stringArray: true,
-  stringArrayEncoding: ["base64"],
-  stringArrayThreshold: 0.75,
-  transformObjectKeys: true,
+  selfDefending: false,
+  stringArray: false,
+  transformObjectKeys: false,
   unicodeEscapeSequence: false,
-  sourceMap: false,
-  sourceMapMode: "separate",
 }).getObfuscatedCode();
 
 const robots = `User-agent: *
@@ -85,7 +83,7 @@ await fs.mkdir(path.join(dist, "css"), { recursive: true });
 await fs.mkdir(path.join(dist, "js"), { recursive: true });
 await fs.writeFile(path.join(dist, "index.html"), minifiedHtml);
 await fs.writeFile(path.join(dist, "css", "style.min.css"), minifiedCss);
-await fs.writeFile(path.join(dist, "js", "main.min.js"), obfuscatedJs);
+await fs.writeFile(path.join(dist, "js", "main.min.js"), minifiedJs);
 await fs.writeFile(path.join(dist, "robots.txt"), robots);
 await fs.writeFile(path.join(dist, "sitemap.xml"), sitemap);
 

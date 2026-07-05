@@ -248,6 +248,8 @@ img {
   flex-direction: column;
   justify-content: center;
   overflow: hidden;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 100vh;
 }
 .scene-inner {
   width: 100%;

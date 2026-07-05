@@ -7,8 +7,17 @@ document.getElementById("year").textContent = new Date().getFullYear();
 
 const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const finePointer = window.matchMedia("(pointer: fine)").matches;
+const isMobile = window.matchMedia("(max-width: 768px)").matches;
+// Zayıf cihaz / veri tasarrufu: canvas'a dokunmadan scroll ve ekstra efektleri hafiflet
+const liteMode =
+  reduced ||
+  isMobile ||
+  (navigator.hardwareConcurrency || 8) <= 2 ||
+  (navigator.deviceMemory || 8) < 4 ||
+  navigator.connection?.saveData === true;
 
 gsap.registerPlugin(ScrollTrigger);
+ScrollTrigger.config({ limitCallbacks: true, ignoreMobileResize: true });
 
 // Canlı sitede farklı domain kullanıyorsan index.html içinde ayarla:
 // <script>window.CONTACT_API_URL = "https://api.senindomain.com/api/contact";</script>
@@ -18,15 +27,14 @@ const CONTACT_API =
     ? `http://localhost:3001/api/contact`
     : "/api/contact");
 
-// ── Lenis smooth scroll ──
+// ── Lenis smooth scroll (masaüstü + güçlü cihaz) ──
 let lenis;
-if (!reduced && typeof Lenis !== "undefined") {
+if (!liteMode && typeof Lenis !== "undefined") {
   lenis = new Lenis({
-    duration: 1.4,
+    duration: 1.2,
     easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
     smoothWheel: true,
-    syncTouch: true,
-    touchMultiplier: 1.2,
+    syncTouch: false,
   });
 
   lenis.on("scroll", ScrollTrigger.update);
@@ -52,16 +60,10 @@ if (!reduced && typeof Lenis !== "undefined") {
 
   gsap.ticker.add((time) => lenis.raf(time * 1000));
   gsap.ticker.lagSmoothing(0);
+} else {
+  // Lenis yokken native scroll ile ScrollTrigger senkronu
+  addEventListener("scroll", () => ScrollTrigger.update(), { passive: true });
 }
-
-// Dokunmatik / trackpad kaydırmalarında ScrollTrigger senkronu
-addEventListener(
-  "scroll",
-  () => {
-    ScrollTrigger.update();
-  },
-  { passive: true },
-);
 
 // ── Nav ──
 const nav = document.getElementById("nav");
@@ -81,6 +83,7 @@ navLinks?.querySelectorAll("a").forEach((a) => {
   });
 });
 
+const jpFill = document.getElementById("jpFill");
 let lastY = 0;
 ScrollTrigger.create({
   start: 0,
@@ -90,21 +93,13 @@ ScrollTrigger.create({
     if (y > 120 && y > lastY) nav.classList.add("hidden");
     else nav.classList.remove("hidden");
     lastY = y;
+    if (jpFill) jpFill.style.width = `${self.progress * 100}%`;
   },
 });
 
 // ── Journey progress + scene label ──
-const jpFill = document.getElementById("jpFill");
 const sceneLabel = document.getElementById("sceneLabel");
 const scenes = document.querySelectorAll(".scene[data-scene]");
-
-ScrollTrigger.create({
-  start: 0,
-  end: "max",
-  onUpdate: (self) => {
-    if (jpFill) jpFill.style.width = `${self.progress * 100}%`;
-  },
-});
 
 function updateLabel(text) {
   if (!sceneLabel) return;
@@ -128,7 +123,7 @@ updateLabel("Intro");
 
 // ── Cursor glow ──
 const glow = document.getElementById("cursorGlow");
-if (glow && finePointer && !reduced) {
+if (glow && finePointer && !liteMode) {
   let gx = innerWidth / 2;
   let gy = innerHeight / 2;
   let tx = gx;
@@ -359,7 +354,12 @@ function initCodeCanvas() {
     draw();
   });
 }
-initCodeCanvas();
+const runCodeCanvas = () => initCodeCanvas();
+if ("requestIdleCallback" in window) {
+  requestIdleCallback(runCodeCanvas, { timeout: 1500 });
+} else {
+  setTimeout(runCodeCanvas, 80);
+}
 
 // ── Hero entrance ──
 gsap.to(".scene-hero .scene-reveal", {
@@ -407,7 +407,7 @@ document.querySelectorAll(".fu-num[data-count]").forEach((el) => {
 });
 
 // ── Magnetic buttons ──
-if (finePointer && !reduced) {
+if (finePointer && !liteMode) {
   document.querySelectorAll("[data-magnetic]").forEach((btn) => {
     const strength = parseFloat(btn.dataset.magnetic) || 0.35;
     btn.addEventListener("mousemove", (e) => {
@@ -423,7 +423,7 @@ if (finePointer && !reduced) {
 }
 
 // ── 3D tilt on build cards ──
-if (finePointer && !reduced) {
+if (finePointer && !liteMode) {
   document.querySelectorAll(".h-card").forEach((card) => {
     card.addEventListener("mousemove", (e) => {
       const r = card.getBoundingClientRect();
@@ -636,7 +636,7 @@ if (canvas && !reduced) {
 
 // ── CTA blob parallax ──
 const contactScene = document.querySelector(".scene-contact");
-if (contactScene && finePointer && !reduced) {
+if (contactScene && finePointer && !liteMode) {
   const blobs = contactScene.querySelectorAll(".cta-blob");
   contactScene.addEventListener("mousemove", (e) => {
     const r = contactScene.getBoundingClientRect();
