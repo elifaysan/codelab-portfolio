@@ -3,7 +3,7 @@ services:
   - type: web
     name: codelab-portfolio
     runtime: node
-    buildCommand: npm install && npm run build && cd backend && npm install
+    buildCommand: npm install --include=dev && npm run build && cd backend && npm install
     startCommand: cd backend && npm start
     envVars:
       - key: NODE_ENV

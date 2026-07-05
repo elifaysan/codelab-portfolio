@@ -76,10 +76,8 @@ app.use(
 app.use(
   cors({
     origin(origin, cb) {
-      if (!origin) {
-        if (isProd) return cb(new Error("CORS blocked"));
-        return cb(null, true);
-      }
+      // Doğrudan sayfa açılışı / aynı origin isteklerinde Origin header olmayabilir
+      if (!origin) return cb(null, true);
       if (origins.includes(origin)) return cb(null, true);
       cb(new Error("CORS blocked"));
     },
