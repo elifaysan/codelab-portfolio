@@ -685,6 +685,50 @@ img {
   flex-shrink: 0;
 }
 
+.horizontal-nav {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  flex: 1;
+  min-width: 0;
+  padding: 0 16px;
+}
+
+.h-nav-btn {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 1px solid var(--glass-border);
+  background: rgba(8, 7, 15, 0.82);
+  backdrop-filter: blur(12px);
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition:
+    background 0.25s var(--ease-out),
+    border-color 0.25s var(--ease-out),
+    transform 0.25s var(--ease-out),
+    opacity 0.25s var(--ease-out);
+  z-index: 3;
+}
+.h-nav-btn svg {
+  width: 22px;
+  height: 22px;
+}
+.h-nav-btn:hover:not(:disabled) {
+  background: rgba(99, 102, 241, 0.22);
+  border-color: rgba(129, 140, 248, 0.45);
+  transform: scale(1.06);
+}
+.h-nav-btn:disabled {
+  opacity: 0.28;
+  cursor: not-allowed;
+}
+
 .horizontal-viewport {
   overflow: hidden;
   width: 100%;
@@ -1378,6 +1422,14 @@ img {
     width: 88vw;
     min-height: 360px;
     scroll-snap-align: center;
+  }
+  .horizontal-nav {
+    gap: 8px;
+    padding: 0 8px;
+  }
+  .h-nav-btn {
+    width: 42px;
+    height: 42px;
   }
   .h-progress {
     display: none;

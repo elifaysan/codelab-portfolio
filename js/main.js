@@ -455,21 +455,68 @@ function initHorizontalScroll() {
   const viewport = document.querySelector(".horizontal-viewport");
   const hTrack = document.getElementById("hTrack");
   const hBar = document.getElementById("hBar");
+  const prevBtn = document.getElementById("hPrev");
+  const nextBtn = document.getElementById("hNext");
   if (!viewport || !hTrack) return null;
 
   enableNativeHorizontal();
 
+  const cards = [...hTrack.querySelectorAll(".h-card")];
   const hint = viewport.querySelector(".h-scroll-hint");
-  if (hint) hint.textContent = "Yana kaydır →";
+  if (hint) hint.textContent = "Ok tuşlarıyla veya yana kaydır →";
 
   const syncProgress = () => {
     const max = viewport.scrollWidth - viewport.clientWidth;
     if (hBar) {
       hBar.style.width = max > 0 ? `${(viewport.scrollLeft / max) * 100}%` : "0%";
     }
+    updateNavButtons();
+  };
+
+  const getActiveIndex = () => {
+    const center = viewport.scrollLeft + viewport.clientWidth / 2;
+    let closest = 0;
+    let minDist = Infinity;
+    cards.forEach((card, i) => {
+      const cardCenter = card.offsetLeft + card.offsetWidth / 2;
+      const dist = Math.abs(cardCenter - center);
+      if (dist < minDist) {
+        minDist = dist;
+        closest = i;
+      }
+    });
+    return closest;
+  };
+
+  const scrollToCard = (index) => {
+    const card = cards[index];
+    if (!card) return;
+    const target = card.offsetLeft - (viewport.clientWidth - card.offsetWidth) / 2;
+    viewport.scrollTo({
+      left: Math.max(0, target),
+      behavior: reduced ? "auto" : "smooth",
+    });
+  };
+
+  const updateNavButtons = () => {
+    const max = viewport.scrollWidth - viewport.clientWidth;
+    const atStart = viewport.scrollLeft <= 8;
+    const atEnd = viewport.scrollLeft >= max - 8;
+    if (prevBtn) prevBtn.disabled = atStart;
+    if (nextBtn) nextBtn.disabled = atEnd;
+  };
+
+  const onPrevClick = () => {
+    scrollToCard(Math.max(0, getActiveIndex() - 1));
+  };
+
+  const onNextClick = () => {
+    scrollToCard(Math.min(cards.length - 1, getActiveIndex() + 1));
   };
 
   viewport.addEventListener("scroll", syncProgress, { passive: true });
+  prevBtn?.addEventListener("click", onPrevClick);
+  nextBtn?.addEventListener("click", onNextClick);
   syncProgress();
 
   let dragging = false;
@@ -507,6 +554,8 @@ function initHorizontalScroll() {
     kill() {
       viewport.removeEventListener("scroll", syncProgress);
       viewport.removeEventListener("mousedown", onMouseDown);
+      prevBtn?.removeEventListener("click", onPrevClick);
+      nextBtn?.removeEventListener("click", onNextClick);
       removeEventListener("mousemove", onMouseMove);
       removeEventListener("mouseup", onMouseUp);
     },

@@ -141,9 +141,20 @@
               Ne<br /><span class="grad">inşa ediyorum?</span>
             </h2>
           </div>
-          <div class="horizontal-viewport">
-            <p class="h-scroll-hint" aria-hidden="true">Yana kaydır →</p>
-            <div class="horizontal-track" id="hTrack">
+          <div class="horizontal-nav">
+            <button
+              type="button"
+              class="h-nav-btn h-nav-prev"
+              id="hPrev"
+              aria-label="Önceki kart"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="M15 18l-6-6 6-6" />
+              </svg>
+            </button>
+            <div class="horizontal-viewport">
+              <p class="h-scroll-hint" aria-hidden="true">Yana kaydır →</p>
+              <div class="horizontal-track" id="hTrack">
               <article class="h-card hc-exp">
                 <span class="hc-num">01</span>
                 <h3>✨ Dijital Deneyimler</h3>
@@ -217,6 +228,17 @@
                 </ul>
               </article>
             </div>
+            </div>
+            <button
+              type="button"
+              class="h-nav-btn h-nav-next"
+              id="hNext"
+              aria-label="Sonraki kart"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="M9 18l6-6-6-6" />
+              </svg>
+            </button>
           </div>
           <div class="h-progress">
             <div class="h-progress-bar" id="hBar"></div>
