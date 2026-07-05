@@ -25,6 +25,8 @@ if (!reduced && typeof Lenis !== "undefined") {
     duration: 1.4,
     easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
     smoothWheel: true,
+    syncTouch: true,
+    touchMultiplier: 1.2,
   });
 
   lenis.on("scroll", ScrollTrigger.update);
@@ -37,7 +39,12 @@ if (!reduced && typeof Lenis !== "undefined") {
       return lenis.scroll;
     },
     getBoundingClientRect() {
-      return { top: 0, left: 0, width: innerWidth, height: innerHeight };
+      return {
+        top: 0,
+        left: 0,
+        width: innerWidth,
+        height: innerHeight,
+      };
     },
   });
 
@@ -46,6 +53,15 @@ if (!reduced && typeof Lenis !== "undefined") {
   gsap.ticker.add((time) => lenis.raf(time * 1000));
   gsap.ticker.lagSmoothing(0);
 }
+
+// Dokunmatik / trackpad kaydırmalarında ScrollTrigger senkronu
+addEventListener(
+  "scroll",
+  () => {
+    ScrollTrigger.update();
+  },
+  { passive: true },
+);
 
 // ── Nav ──
 const nav = document.getElementById("nav");
@@ -427,67 +443,94 @@ if (finePointer && !reduced) {
   });
 }
 
-// ── Horizontal scroll (Scene 2) ──
+// ── Horizontal scroll (Scene 2) — native, tüm cihazlarda güvenilir ──
+function enableNativeHorizontal() {
+  const viewport = document.querySelector(".horizontal-viewport");
+  if (!viewport) return;
+  viewport.classList.add("horizontal-native");
+  viewport.setAttribute("data-lenis-prevent", "");
+}
+
 function initHorizontalScroll() {
+  const viewport = document.querySelector(".horizontal-viewport");
   const hTrack = document.getElementById("hTrack");
   const hBar = document.getElementById("hBar");
-  const buildSection = document.querySelector(".scene-build");
-  if (!hTrack || !buildSection) return;
+  if (!viewport || !hTrack) return null;
 
-  const cards = hTrack.querySelectorAll(".h-card");
-  const mm = gsap.matchMedia();
+  enableNativeHorizontal();
 
-  mm.add("(min-width: 769px)", () => {
-    const getDistance = () => Math.max(hTrack.scrollWidth - innerWidth, 0);
+  const hint = viewport.querySelector(".h-scroll-hint");
+  if (hint) hint.textContent = "Yana kaydır →";
 
-    const tween = gsap.to(hTrack, {
-      x: () => -getDistance(),
-      ease: "none",
-      scrollTrigger: {
-        trigger: buildSection,
-        pin: ".build-pin",
-        scrub: 1,
-        start: "top top",
-        end: () => `+=${getDistance()}`,
-        anticipatePin: 1,
-        invalidateOnRefresh: true,
-        pinSpacing: true,
-        onUpdate: (self) => {
-          if (hBar) hBar.style.width = `${self.progress * 100}%`;
-          const centerX = innerWidth / 2;
-          cards.forEach((card) => {
-            const r = card.getBoundingClientRect();
-            const cardCenter = r.left + r.width / 2;
-            const dist = Math.abs(centerX - cardCenter);
-            const proximity = gsap.utils.clamp(0, 1, 1 - dist / (innerWidth * 0.7));
-            const scale = gsap.utils.mapRange(0, 1, 0.92, 1, proximity);
-            const opacity = gsap.utils.mapRange(0, 1, 0.55, 1, proximity);
-            gsap.set(card, { scale, opacity });
-          });
-        },
-      },
-    });
+  const syncProgress = () => {
+    const max = viewport.scrollWidth - viewport.clientWidth;
+    if (hBar) {
+      hBar.style.width = max > 0 ? `${(viewport.scrollLeft / max) * 100}%` : "0%";
+    }
+  };
 
-    return () => {
-      tween.scrollTrigger?.kill();
-      tween.kill();
-      gsap.set(hTrack, { clearProps: "transform" });
-      gsap.set(cards, { clearProps: "transform,opacity" });
-      if (hBar) hBar.style.width = "0%";
-    };
-  });
+  viewport.addEventListener("scroll", syncProgress, { passive: true });
+  syncProgress();
 
-  return mm;
+  let dragging = false;
+  let startX = 0;
+  let startScroll = 0;
+
+  const onMouseDown = (e) => {
+    if (!finePointer || e.button !== 0) return;
+    const target = e.target;
+    if (target.closest("a, button, input, textarea, select")) return;
+    dragging = true;
+    startX = e.pageX;
+    startScroll = viewport.scrollLeft;
+    viewport.classList.add("is-dragging");
+  };
+
+  const onMouseMove = (e) => {
+    if (!dragging) return;
+    e.preventDefault();
+    viewport.scrollLeft = startScroll - (e.pageX - startX);
+    syncProgress();
+  };
+
+  const onMouseUp = () => {
+    if (!dragging) return;
+    dragging = false;
+    viewport.classList.remove("is-dragging");
+  };
+
+  viewport.addEventListener("mousedown", onMouseDown);
+  addEventListener("mousemove", onMouseMove);
+  addEventListener("mouseup", onMouseUp);
+
+  return {
+    kill() {
+      viewport.removeEventListener("scroll", syncProgress);
+      viewport.removeEventListener("mousedown", onMouseDown);
+      removeEventListener("mousemove", onMouseMove);
+      removeEventListener("mouseup", onMouseUp);
+    },
+  };
 }
 
-let horizontalMM;
-if (!reduced) {
-  horizontalMM = initHorizontalScroll();
+function refreshHorizontalScroll() {
+  horizontalScroll?.kill?.();
+  horizontalScroll = initHorizontalScroll();
+  ScrollTrigger.refresh();
 }
+
+let horizontalScroll = initHorizontalScroll();
 
 window.addEventListener("load", () => {
-  ScrollTrigger.refresh();
+  refreshHorizontalScroll();
+  // Yavaş bağlantıda kart genişliği geç hesaplanırsa tekrar dene
+  setTimeout(refreshHorizontalScroll, 400);
+  setTimeout(refreshHorizontalScroll, 1500);
 });
+
+if (document.fonts?.ready) {
+  document.fonts.ready.then(() => refreshHorizontalScroll());
+}
 
 // ── Process timeline ──
 const processLine = document.getElementById("processLine");
@@ -694,8 +737,6 @@ let resizeTimer;
 addEventListener("resize", () => {
   clearTimeout(resizeTimer);
   resizeTimer = setTimeout(() => {
-    horizontalMM?.revert();
-    if (!reduced) horizontalMM = initHorizontalScroll();
-    ScrollTrigger.refresh();
+    refreshHorizontalScroll();
   }, 300);
 });

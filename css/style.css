@@ -668,11 +668,13 @@ img {
   min-height: auto;
 }
 .build-pin {
-  height: 100vh;
+  min-height: 100vh;
+  height: auto;
   width: 100%;
   display: flex;
   flex-direction: column;
   justify-content: center;
+  padding: 100px 0 48px;
 }
 
 .build-header {
@@ -689,6 +691,55 @@ img {
   flex: 1;
   display: flex;
   align-items: center;
+  position: relative;
+}
+
+.h-scroll-hint {
+  display: none;
+  position: absolute;
+  right: 24px;
+  bottom: 12px;
+  z-index: 2;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  pointer-events: none;
+}
+
+.horizontal-viewport.horizontal-native {
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x mandatory;
+  touch-action: pan-x;
+  align-items: stretch;
+  padding-bottom: 8px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(129, 140, 248, 0.55) transparent;
+  cursor: grab;
+}
+.horizontal-viewport.horizontal-native.is-dragging {
+  cursor: grabbing;
+  user-select: none;
+}
+.horizontal-viewport.horizontal-native::-webkit-scrollbar {
+  height: 6px;
+}
+.horizontal-viewport.horizontal-native::-webkit-scrollbar-thumb {
+  background: rgba(129, 140, 248, 0.55);
+  border-radius: 3px;
+}
+.horizontal-viewport.horizontal-native .h-scroll-hint {
+  display: block;
+}
+.horizontal-viewport.horizontal-native .horizontal-track {
+  transform: none !important;
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+.horizontal-viewport.horizontal-native .h-card {
+  scroll-snap-align: center;
 }
 
 .horizontal-track {
@@ -1259,6 +1310,50 @@ img {
   }
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .horizontal-viewport {
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
+  }
+  .horizontal-viewport .h-scroll-hint {
+    display: block;
+  }
+  .horizontal-track {
+    transform: none !important;
+  }
+  .h-progress {
+    display: none;
+  }
+}
+
+@media (min-width: 769px) and (hover: none) {
+  .scene-build .build-pin {
+    height: auto;
+    min-height: 100vh;
+    padding: 100px 0 48px;
+  }
+  .horizontal-viewport {
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
+  }
+  .horizontal-viewport .h-scroll-hint {
+    display: block;
+  }
+  .horizontal-track {
+    transform: none !important;
+  }
+  .h-progress {
+    display: none;
+  }
+  .h-card {
+    scroll-snap-align: center;
+  }
+}
+
 @media (max-width: 768px) {
   .scene-build .build-pin {
     height: auto;
@@ -1270,6 +1365,9 @@ img {
     overflow-y: hidden;
     -webkit-overflow-scrolling: touch;
     scroll-snap-type: x mandatory;
+  }
+  .horizontal-viewport .h-scroll-hint {
+    display: block;
   }
   .horizontal-track {
     padding: 0 24px;
