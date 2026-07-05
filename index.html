@@ -1,0 +1,457 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#08070f" />
+    <meta
+      name="description"
+      content="Elif Aysan — AI & Software Engineer. Immersive digital experiences, modern web, AI & mobile."
+    />
+    <title>Elif Aysan · Digital Journey</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Poppins:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <div class="grain" aria-hidden="true"></div>
+    <div class="cursor-glow" id="cursorGlow" aria-hidden="true"></div>
+    <canvas id="sparkCanvas" class="spark-canvas" aria-hidden="true"></canvas>
+    <div class="ambient-light al-1" aria-hidden="true"></div>
+    <div class="ambient-light al-2" aria-hidden="true"></div>
+
+    <canvas id="codeCanvas" class="code-canvas" aria-hidden="true"></canvas>
+
+    <!-- Sahne ilerleme -->
+    <div class="journey-progress" aria-hidden="true">
+      <div class="jp-fill" id="jpFill"></div>
+    </div>
+    <div class="scene-label" id="sceneLabel" aria-hidden="true" hidden></div>
+
+    <header class="nav" id="nav">
+      <a href="#scene-hero" class="nav-logo">code<span>Lab</span></a>
+      <nav class="nav-links" id="navLinks">
+        <a href="#scene-identity" data-scene="Kim">Kim</a>
+        <a href="#scene-build" data-scene="Üretim">Üretim</a>
+        <a href="#scene-ai" data-scene="AI">AI</a>
+        <a href="#scene-contact" class="nav-cta">Başlayalım</a>
+      </nav>
+      <button class="nav-toggle" id="navToggle" aria-label="Menü">
+        <span></span><span></span>
+      </button>
+    </header>
+
+    <main id="journey">
+      <!-- ═══ SCENE 0 · HERO ═══ -->
+      <section class="scene scene-hero" id="scene-hero" data-scene="Intro">
+        <div class="hero-bg">
+          <div class="hero-grid" aria-hidden="true"></div>
+          <div class="hero-mesh"></div>
+          <div class="hero-orb ho-1"></div>
+          <div class="hero-orb ho-2"></div>
+        </div>
+
+        <div class="scene-inner hero-inner">
+          <div class="hero-code-bar glass scene-reveal">
+            <span class="hc-file">status.js</span>
+            <code class="hc-snippet"
+              ><span class="tok-k">const</span>
+              <span class="tok-v">elif</span> = {
+              <span class="tok-p">available</span>:
+              <span class="tok-b">true</span> }</code
+            >
+          </div>
+
+          <p class="hero-eyebrow scene-reveal">AI &amp; Software Engineer</p>
+          <h1 class="hero-display scene-reveal">
+            <span class="line">Dijital</span>
+            <span class="line grad">Deneyimler</span>
+            <span class="line">İnşa Ediyorum.</span>
+          </h1>
+          <p class="hero-lead scene-reveal">
+            Modern web · Yapay zeka · Mobil · Özel yazılım
+          </p>
+        </div>
+
+        <div class="scroll-hint">
+          <span>Keşfet</span>
+          <div class="scroll-line"></div>
+        </div>
+      </section>
+
+      <!-- ═══ SCENE 1 · WHO I AM ═══ -->
+      <section
+        class="scene scene-identity"
+        id="scene-identity"
+        data-scene="01 — Kim"
+      >
+        <div class="scene-inner identity-inner">
+          <div class="identity-visual scene-reveal">
+            <div class="id-glow"></div>
+            <img
+              src="assets/elif-illustration.png"
+              alt="Elif Aysan"
+              class="id-portrait"
+            />
+          </div>
+          <div class="identity-copy">
+            <h2 class="scene-headline scene-reveal">
+              Ben<br /><span class="grad">Elif Aysan.</span>
+            </h2>
+            <p class="scene-body scene-reveal">
+              Teknolojinin sürekli geliştiği bir dünyada, işletmelerin
+              <strong>dijital dönüşümüne</strong> katkı sağlayan
+              <strong>modern yazılım çözümleri</strong> geliştiriyorum.
+            </p>
+            <p class="scene-body scene-reveal">
+              Web sitelerinden özel web uygulamalarına, QR menü sistemlerinden
+              yapay zeka destekli özelliklere kadar her projeyi
+              <strong>kullanıcı deneyimini</strong> ve
+              <strong>performansı</strong> ön planda tutarak tasarlıyorum.
+            </p>
+            <p class="scene-body scene-reveal">
+              Amacım yalnızca çalışan bir ürün geliştirmek değil;
+              <strong>markanızı dijital ortamda güçlendirecek</strong>,
+              müşterilerinize daha iyi bir deneyim sunacak ve iş süreçlerinizi
+              kolaylaştıracak çözümler üretmek. Her projeye
+              <strong>yenilikçi, detay odaklı ve sürdürülebilir</strong> bir
+              bakış açısıyla yaklaşıyorum.
+            </p>
+            <div class="id-chips scene-reveal">
+              <span>Engineer</span><span>Builder</span
+              ><span>Problem Solver</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══ SCENE 2 · WHAT I BUILD (horizontal) ═══ -->
+      <section
+        class="scene scene-build"
+        id="scene-build"
+        data-scene="02 — Üretim"
+      >
+        <div class="build-pin">
+          <div class="build-header">
+            <h2 class="scene-headline">
+              Ne<br /><span class="grad">inşa ediyorum?</span>
+            </h2>
+          </div>
+          <div class="horizontal-viewport">
+            <div class="horizontal-track" id="hTrack">
+              <article class="h-card hc-exp">
+                <span class="hc-num">01</span>
+                <h3>✨ Dijital Deneyimler</h3>
+                <p>
+                  Sadece çalışan yazılımlar değil, müşterilerinizin keyifle
+                  kullanacağı modern dijital deneyimler tasarlıyorum.
+                </p>
+                <ul class="check-list">
+                  <li>QR Menü</li>
+                  <li>Online Rezervasyon</li>
+                  <li>Etkileşimli Arayüzler</li>
+                </ul>
+              </article>
+
+              <article class="h-card hc-mobile">
+                <span class="hc-num">02</span>
+                <h3>📱 Mobil Uygulamalar</h3>
+                <p>
+                  Müşterilerinizin veya ekibinizin dilediği her yerden kolayca
+                  kullanabileceği modern mobil uygulamalar geliştiriyorum.
+                </p>
+                <ul class="check-list">
+                  <li>Android &amp; iPhone</li>
+                  <li>Kullanıcı Dostu</li>
+                  <li>Hızlı ve Güvenli</li>
+                </ul>
+              </article>
+
+              <article class="h-card hc-web">
+                <span class="hc-num">03</span>
+                <h3>🌐 İşletmenizi Yansıtan Web Siteleri</h3>
+                <p>
+                  İlk izlenim çok önemlidir. Markanızı en iyi şekilde yansıtan,
+                  güven veren ve tüm cihazlarda kusursuz çalışan modern web
+                  siteleri geliştiriyorum.
+                </p>
+                <ul class="check-list">
+                  <li>Profesyonel Tasarım</li>
+                  <li>Mobil Uyumlu</li>
+                  <li>Hızlı Açılış</li>
+                </ul>
+              </article>
+
+              <article class="h-card hc-soft">
+                <span class="hc-num">04</span>
+                <h3>⚙️ İşletmeye Özel Yazılımlar</h3>
+                <p>
+                  İşletmenizin ihtiyaçlarına göre geliştirilen yönetim panelleri,
+                  randevu sistemleri ve özel yazılımlarla işinizi daha kolay
+                  yönetmenizi sağlıyorum.
+                </p>
+                <ul class="check-list">
+                  <li>Randevu Sistemi</li>
+                  <li>Yönetim Paneli</li>
+                  <li>Müşteri Takibi</li>
+                </ul>
+              </article>
+
+              <article class="h-card hc-ai">
+                <span class="hc-num">05</span>
+                <h3>🤖 Yapay Zeka Destekli Çözümler</h3>
+                <p>
+                  Müşterilerinize daha hızlı hizmet vermenizi sağlayan, iş
+                  yükünüzü azaltan ve süreçlerinizi kolaylaştıran yapay zeka
+                  çözümleri geliştiriyorum.
+                </p>
+                <ul class="check-list">
+                  <li>Akıllı Asistanlar</li>
+                  <li>Otomatik Yanıt Sistemleri</li>
+                  <li>İş Süreçlerini Kolaylaştırma</li>
+                </ul>
+              </article>
+            </div>
+          </div>
+          <div class="h-progress">
+            <div class="h-progress-bar" id="hBar"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══ SCENE 3 · AI ═══ -->
+      <section class="scene scene-ai" id="scene-ai" data-scene="03 — AI">
+        <canvas id="aiCanvas" aria-hidden="true"></canvas>
+        <div class="ai-vignette"></div>
+        <div class="scene-inner ai-inner">
+          <h2 class="scene-headline light scene-reveal scene-headline--ai">
+            Yapay zekayı karmaşık bir teknoloji olarak değil,<br />
+            <span class="grad-light">işletmenizin işini kolaylaştıran bir yardımcı</span>
+            olarak kullanıyorum.
+          </h2>
+          <p class="scene-body light scene-reveal">
+            Daha hızlı hizmet, daha az zaman kaybı ve daha mutlu müşteriler için
+            akıllı çözümler geliştiriyorum.
+          </p>
+          <div class="ai-features scene-reveal">
+            <div class="ai-feat glass-dark">
+              <h4>🤖 7/24 Müşteri Desteği</h4>
+              <p>
+                Müşterilerinizin sık sorduğu sorulara günün her saati otomatik
+                cevap verin.
+              </p>
+            </div>
+            <div class="ai-feat glass-dark">
+              <h4>⚡ Zamandan Tasarruf</h4>
+              <p>
+                Tekrarlayan işleri otomatikleştirerek ekibinizin daha verimli
+                çalışmasını sağlayın.
+              </p>
+            </div>
+            <div class="ai-feat glass-dark">
+              <h4>📊 Daha Akıllı Kararlar</h4>
+              <p>
+                Verilerinizi anlamlandırarak işletmeniz için daha doğru kararlar
+                almanıza yardımcı olun.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══ SCENE 4 · PROCESS ═══ -->
+      <section
+        class="scene scene-process"
+        id="scene-process"
+        data-scene="04 — Süreç"
+      >
+        <div class="scene-inner process-inner">
+          <div class="process-head">
+            <h2 class="scene-headline scene-reveal">
+              Nasıl<br /><span class="grad">çalışıyoruz?</span>
+            </h2>
+            <p class="scene-body scene-reveal process-intro">
+              Fikrinizi iletin, online toplantıyla başlayalım — süreç şeffaf ve hızlı ilerler.
+            </p>
+          </div>
+          <ol class="process-line" id="processLine">
+            <li class="pl-step scene-reveal">
+              <span class="pl-icon">📩</span>
+              <div class="pl-content">
+                <h3>Fikrinizi İletin</h3>
+                <p>
+                  <a href="mailto:elifaysancode@outlook.com">E-posta</a> veya sitedeki
+                  <a href="#scene-contact">Bize Ulaşın</a> bölümünden yazmanız yeterli.
+                </p>
+              </div>
+            </li>
+            <li class="pl-step scene-reveal">
+              <span class="pl-icon">📅</span>
+              <div class="pl-content">
+                <h3>Toplantı Planlayalım</h3>
+                <p>Online görüşme ile ihtiyaçlarınızı birlikte netleştirelim.</p>
+              </div>
+            </li>
+            <li class="pl-step scene-reveal">
+              <span class="pl-icon">✏️</span>
+              <div class="pl-content">
+                <h3>Tasarım &amp; Geri Dönüş</h3>
+                <p>Taslak hazırlanır, geri bildirimlerinizle onaylanır.</p>
+              </div>
+            </li>
+            <li class="pl-step scene-reveal">
+              <span class="pl-icon">💻</span>
+              <div class="pl-content">
+                <h3>Geliştirme</h3>
+                <p>Onaylanan tasarım kodlanır, süreç boyunca bilgilendirilirsiniz.</p>
+              </div>
+            </li>
+            <li class="pl-step scene-reveal">
+              <span class="pl-icon">🚀</span>
+              <div class="pl-content">
+                <h3>Yayına Alma</h3>
+                <p>Test edilir ve projeniz canlıya alınır.</p>
+              </div>
+            </li>
+            <li class="pl-step scene-reveal">
+              <span class="pl-icon">🔧</span>
+              <div class="pl-content">
+                <h3>Aylık Bakım</h3>
+                <p>Güncelleme ve teknik destek ile sorunsuz çalışmaya devam eder.</p>
+              </div>
+            </li>
+          </ol>
+        </div>
+      </section>
+
+      <!-- ═══ SCENE 5 · CTA + CONTACT ═══ -->
+      <section
+        class="scene scene-contact"
+        id="scene-contact"
+        data-scene="05 — Başlayalım"
+      >
+        <div class="cta-blobs" aria-hidden="true">
+          <div class="cta-blob cb-1"></div>
+          <div class="cta-blob cb-2"></div>
+        </div>
+        <div class="scene-inner contact-inner">
+          <div class="contact-copy">
+            <h2 class="cta-display scene-reveal">
+              Harika fikirler<br /><span class="grad">güçlü yazılımlarla</span
+              ><br />hayat bulur.
+            </h2>
+            <a
+              href="mailto:elifaysancode@outlook.com"
+              class="contact-email scene-reveal"
+            >
+              <svg
+                class="contact-email-icon"
+                width="28"
+                height="28"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.75"
+                aria-hidden="true"
+              >
+                <rect x="2" y="4" width="20" height="16" rx="2" />
+                <path d="M2 7l10 7 10-7" />
+              </svg>
+              <span>elifaysancode@outlook.com</span>
+            </a>
+          </div>
+
+          <form
+            class="contact-form glass scene-reveal"
+            id="contactForm"
+            novalidate
+          >
+            <input
+              type="text"
+              name="_gotcha"
+              class="cf-honeypot"
+              tabindex="-1"
+              autocomplete="off"
+              aria-hidden="true"
+            />
+            <div class="cf-row">
+              <div class="cf-field">
+                <label for="name">Ad Soyad</label
+                ><input
+                  type="text"
+                  id="name"
+                  name="name"
+                  placeholder="Adınız ve soyadınız"
+                  required
+                  autocomplete="name"
+                />
+              </div>
+              <div class="cf-field">
+                <label for="email">E-posta</label
+                ><input
+                  type="email"
+                  id="email"
+                  name="email"
+                  placeholder="siz@mail.com"
+                  required
+                />
+              </div>
+            </div>
+            <div class="cf-field">
+              <label for="service">Ne inşa edelim?</label>
+              <select id="service" name="service">
+                <option>QR Menü</option>
+                <option>Mobil Uygulama</option>
+                <option>Web Sitesi</option>
+                <option>Özel Yazılım</option>
+                <option>Dijital Deneyim</option>
+                <option>Yapay Zeka Çözümü</option>
+              </select>
+            </div>
+            <div class="cf-field">
+              <label for="message">Mesaj</label
+              ><textarea
+                id="message"
+                name="message"
+                rows="3"
+                placeholder="Projenizden bahsedin..."
+                required
+              ></textarea>
+            </div>
+            <button type="submit" class="btn-submit">
+              <span>Gönder</span
+              ><svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M5 12h14M12 5l7 7-7 7" />
+              </svg>
+            </button>
+            <p class="form-note" id="formNote"></p>
+          </form>
+        </div>
+
+        <footer class="site-footer">
+          <span
+            >© <span id="year"></span> Elif Aysan · AI &amp; Software
+            Engineer</span
+          >
+          <a href="#scene-hero">↑ Başa dön</a>
+        </footer>
+      </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.18/dist/lenis.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+    <script src="js/main.js"></script>
+  </body>
+</html>
