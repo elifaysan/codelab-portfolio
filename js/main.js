@@ -457,32 +457,25 @@ function initHorizontalScroll() {
   const hBar = document.getElementById("hBar");
   const prevBtn = document.getElementById("hPrev");
   const nextBtn = document.getElementById("hNext");
-  const prevCtrl = document.getElementById("hPrevCtrl");
-  const nextCtrl = document.getElementById("hNextCtrl");
-  const prevBtns = [prevBtn, prevCtrl].filter(Boolean);
-  const nextBtns = [nextBtn, nextCtrl].filter(Boolean);
   if (!viewport || !hTrack) return null;
 
   enableNativeHorizontal();
 
   const cards = [...hTrack.querySelectorAll(".h-card")];
   const hint = viewport.querySelector(".h-scroll-hint");
-  if (hint) hint.textContent = "Ok tuşlarıyla veya yana kaydır →";
+  if (hint) hint.textContent = "Oklarla veya yana kaydır →";
 
-  const syncProgress = () => {
-    const max = viewport.scrollWidth - viewport.clientWidth;
-    if (hBar) {
-      hBar.style.width = max > 0 ? `${(viewport.scrollLeft / max) * 100}%` : "0%";
-    }
-    updateNavButtons();
-  };
+  const getCardLeft = (card) =>
+    card.offsetLeft + hTrack.offsetLeft - (viewport.clientWidth - card.offsetWidth) / 2;
+
+  const getMaxScroll = () => Math.max(0, viewport.scrollWidth - viewport.clientWidth);
 
   const getActiveIndex = () => {
     const center = viewport.scrollLeft + viewport.clientWidth / 2;
     let closest = 0;
     let minDist = Infinity;
     cards.forEach((card, i) => {
-      const cardCenter = card.offsetLeft + card.offsetWidth / 2;
+      const cardCenter = card.offsetLeft + hTrack.offsetLeft + card.offsetWidth / 2;
       const dist = Math.abs(cardCenter - center);
       if (dist < minDist) {
         minDist = dist;
@@ -495,36 +488,44 @@ function initHorizontalScroll() {
   const scrollToCard = (index) => {
     const card = cards[index];
     if (!card) return;
-    const target = card.offsetLeft - (viewport.clientWidth - card.offsetWidth) / 2;
-    viewport.scrollTo({
-      left: Math.max(0, target),
+    card.scrollIntoView({
       behavior: reduced ? "auto" : "smooth",
+      inline: "center",
+      block: "nearest",
     });
+    requestAnimationFrame(syncProgress);
+    setTimeout(syncProgress, 350);
   };
 
   const updateNavButtons = () => {
-    const max = viewport.scrollWidth - viewport.clientWidth;
-    const atStart = viewport.scrollLeft <= 8;
-    const atEnd = viewport.scrollLeft >= max - 8;
-    prevBtns.forEach((btn) => {
-      btn.disabled = atStart;
-    });
-    nextBtns.forEach((btn) => {
-      btn.disabled = atEnd;
-    });
+    const i = getActiveIndex();
+    if (prevBtn) prevBtn.disabled = i <= 0;
+    if (nextBtn) nextBtn.disabled = i >= cards.length - 1;
   };
 
-  const onPrevClick = () => {
+  const syncProgress = () => {
+    const max = getMaxScroll();
+    if (hBar) {
+      hBar.style.width = max > 0 ? `${(viewport.scrollLeft / max) * 100}%` : "0%";
+    }
+    updateNavButtons();
+  };
+
+  const onPrevClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
     scrollToCard(Math.max(0, getActiveIndex() - 1));
   };
 
-  const onNextClick = () => {
+  const onNextClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
     scrollToCard(Math.min(cards.length - 1, getActiveIndex() + 1));
   };
 
   viewport.addEventListener("scroll", syncProgress, { passive: true });
-  prevBtns.forEach((btn) => btn.addEventListener("click", onPrevClick));
-  nextBtns.forEach((btn) => btn.addEventListener("click", onNextClick));
+  prevBtn?.addEventListener("click", onPrevClick);
+  nextBtn?.addEventListener("click", onNextClick);
   syncProgress();
 
   let dragging = false;
@@ -562,8 +563,8 @@ function initHorizontalScroll() {
     kill() {
       viewport.removeEventListener("scroll", syncProgress);
       viewport.removeEventListener("mousedown", onMouseDown);
-      prevBtns.forEach((btn) => btn.removeEventListener("click", onPrevClick));
-      nextBtns.forEach((btn) => btn.removeEventListener("click", onNextClick));
+      prevBtn?.removeEventListener("click", onPrevClick);
+      nextBtn?.removeEventListener("click", onNextClick);
       removeEventListener("mousemove", onMouseMove);
       removeEventListener("mouseup", onMouseUp);
     },
